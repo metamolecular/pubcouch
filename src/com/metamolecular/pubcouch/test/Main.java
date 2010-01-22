@@ -39,8 +39,8 @@ public class Main
   {
     TestSuite suite = new TestSuite();
 
-    suite.addTestSuite(SnapshotTest.class);
-    suite.addTestSuite(BundleTest.class);
+//    suite.addTestSuite(SnapshotTest.class);
+//    suite.addTestSuite(BundleTest.class);
     suite.addTestSuite(RecordTest.class);
 
     TestRunner.run(suite);
