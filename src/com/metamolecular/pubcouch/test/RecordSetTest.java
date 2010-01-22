@@ -23,11 +23,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.metamolecular.pubcouch.test;
 
 import com.metamolecular.pubcouch.model.Record;
 import com.metamolecular.pubcouch.model.RecordSet;
+import java.io.BufferedReader;
+import java.io.StringReader;
+import java.util.Iterator;
 import junit.framework.TestCase;
 
 /**
@@ -36,13 +38,55 @@ import junit.framework.TestCase;
  */
 public class RecordSetTest extends TestCase
 {
-  private RecordSet set;
 
-  public void testItIteratesOverOneRecord() throws Exception
+  private RecordSet set;
+  private String records;
+
+  @Override
+  protected void setUp() throws Exception
   {
-    for (Record record : set)
+    records = "";
+  }
+
+  private void loadRecords(int count)
+  {
+    for (int i = 0; i < count; i++)
     {
-      
+      records += Molfiles.benzene + "\n" + "$$$$\n";
     }
+
+    set = new RecordSet(new BufferedReader(new StringReader(records)));
+  }
+
+  public void testNoRecordsDoesNotHaveNext() throws Exception
+  {
+    loadRecords(0);
+    assertFalse(set.iterator().hasNext());
+  }
+
+  public void testOneRecordHasNext() throws Exception
+  {
+    loadRecords(1);
+    assertTrue(set.iterator().hasNext());
+  }
+
+  public void testOneRecordNextReturnsNext() throws Exception
+  {
+    loadRecords(2);
+    assertEquals(Molfiles.benzene, set.iterator().next().getMolfile());
+  }
+
+  public void testOneRecordDoesNotHaveNextAfterNext() throws Exception
+  {
+    loadRecords(1);
+    set.iterator().next();
+    assertFalse(set.iterator().hasNext());
+  }
+
+  public void testNextTwiceReturnsRecords() throws Exception
+  {
+    loadRecords(2);
+    assertEquals(Molfiles.benzene, set.iterator().next().getMolfile());
+    assertEquals(Molfiles.benzene, set.iterator().next().getMolfile());
   }
 }
