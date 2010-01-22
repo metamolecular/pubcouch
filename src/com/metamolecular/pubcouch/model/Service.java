@@ -24,25 +24,35 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.test;
+package com.metamolecular.pubcouch.model;
 
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
+import java.io.IOException;
+import org.apache.commons.net.ftp.FTPClient;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class Main
+public abstract class Service
 {
-  public static void main(String[] args) throws Exception
+  private FTPClient client;
+
+  public Service()
   {
-    TestSuite suite = new TestSuite();
-
-    suite.addTestSuite(RecordTest.class);
-    suite.addTestSuite(RecordStreamerTest.class);
-    suite.addTestSuite(ServiceTest.class);
-
-    TestRunner.run(suite);
+    client = new FTPClient();
   }
+
+  public Service(FTPClient client)
+  {
+    this.client = client;
+  }
+
+  public void connect(String username, String password) throws IOException
+  {
+    client.connect("ftp.ncbi.nlm.nih.gov");
+    client.login(username, password);
+  }
+
+  public abstract RecordStreamer getStructures();
+  public abstract RecordStreamer getSubstances();
 }

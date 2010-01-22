@@ -25,21 +25,18 @@
  */
 package com.metamolecular.pubcouch.test;
 
-import com.metamolecular.pubcouch.model.Record;
-import com.metamolecular.pubcouch.model.RecordSet;
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.util.Iterator;
+import com.metamolecular.pubcouch.model.RecordStreamer;
+import java.io.ByteArrayInputStream;
 import junit.framework.TestCase;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class RecordSetTest extends TestCase
+public class RecordStreamerTest extends TestCase
 {
 
-  private RecordSet set;
+  private RecordStreamer streamer;
   private String records;
 
   @Override
@@ -48,45 +45,45 @@ public class RecordSetTest extends TestCase
     records = "";
   }
 
-  private void loadRecords(int count)
+  private void loadRecords(int count) throws Exception
   {
     for (int i = 0; i < count; i++)
     {
       records += Molfiles.benzene + "\n" + "$$$$\n";
     }
-
-    set = new RecordSet(new BufferedReader(new StringReader(records)));
+    
+    streamer = new RecordStreamer(new ByteArrayInputStream(records.getBytes("UTF-8")));
   }
 
   public void testNoRecordsDoesNotHaveNext() throws Exception
   {
     loadRecords(0);
-    assertFalse(set.iterator().hasNext());
+    assertFalse(streamer.iterator().hasNext());
   }
 
   public void testOneRecordHasNext() throws Exception
   {
     loadRecords(1);
-    assertTrue(set.iterator().hasNext());
+    assertTrue(streamer.iterator().hasNext());
   }
 
   public void testOneRecordNextReturnsNext() throws Exception
   {
     loadRecords(2);
-    assertEquals(Molfiles.benzene, set.iterator().next().getMolfile());
+    assertEquals(Molfiles.benzene, streamer.iterator().next().getMolfile());
   }
 
   public void testOneRecordDoesNotHaveNextAfterNext() throws Exception
   {
     loadRecords(1);
-    set.iterator().next();
-    assertFalse(set.iterator().hasNext());
+    streamer.iterator().next();
+    assertFalse(streamer.iterator().hasNext());
   }
 
   public void testNextTwiceReturnsRecords() throws Exception
   {
     loadRecords(2);
-    assertEquals(Molfiles.benzene, set.iterator().next().getMolfile());
-    assertEquals(Molfiles.benzene, set.iterator().next().getMolfile());
+    assertEquals(Molfiles.benzene, streamer.iterator().next().getMolfile());
+    assertEquals(Molfiles.benzene, streamer.iterator().next().getMolfile());
   }
 }

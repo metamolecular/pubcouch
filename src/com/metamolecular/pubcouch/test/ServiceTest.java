@@ -24,70 +24,61 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.model;
+package com.metamolecular.pubcouch.test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Iterator;
+import com.metamolecular.pubcouch.model.RecordStreamer;
+import com.metamolecular.pubcouch.model.Service;
+import junit.framework.TestCase;
+import mockit.Expectations;
+import mockit.Mocked;
+import org.apache.commons.net.ftp.FTPClient;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class RecordSet implements Iterable
+public  class ServiceTest extends TestCase
 {
-  private BufferedReader reader;
+  @Mocked private FTPClient client;
+  private Service service;
 
-  public RecordSet(BufferedReader reader)
+  @Override
+  protected void setUp() throws Exception
   {
-    this.reader = reader;
+    service = new DummyService(client);
   }
 
-  public Iterator<Record> iterator()
+  public void testConnectSetsUpConnection() throws Exception
   {
-    return new RecordIterator();
+    new Expectations()
+    {
+      {
+        client.connect("ftp.ncbi.nlm.nih.gov");
+        client.login("user", "password");
+      }
+    };
+
+    service.connect("user", "password");
   }
 
-  private class RecordIterator implements Iterator
+  private class DummyService extends Service
   {
-    public boolean hasNext()
+    private DummyService(FTPClient client)
     {
-      try
-      {
-        reader.mark(1);
-        if (reader.read() != -1)
-        {
-          reader.reset();
-          return true;
-        }
-      }
-      catch (IOException e)
-      {
-        throw new RuntimeException("Error accessing the underlying datastream.", e);
-      }
-
-      return false;
+      super(client);
     }
 
-    public Object next()
-    {
-      Record result = null;
-
-      try
-      {
-        result = new Record(reader);
-      }
-      catch(IOException e)
-      {
-        throw new RuntimeException(e);
-      }
-      
-      return result;
-    }
-
-    public void remove()
+    @Override
+    public RecordStreamer getStructures()
     {
       throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public RecordStreamer getSubstances()
+    {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
+
   }
 }

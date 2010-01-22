@@ -24,25 +24,72 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.test;
+package com.metamolecular.pubcouch.model;
 
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Iterator;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class Main
+public class RecordStreamer implements Iterable
 {
-  public static void main(String[] args) throws Exception
+  private BufferedReader reader;
+
+  public RecordStreamer(InputStream stream)
   {
-    TestSuite suite = new TestSuite();
+    this.reader = new BufferedReader(new InputStreamReader(stream));
+  }
 
-    suite.addTestSuite(RecordTest.class);
-    suite.addTestSuite(RecordStreamerTest.class);
-    suite.addTestSuite(ServiceTest.class);
+  public Iterator<Record> iterator()
+  {
+    return new RecordIterator();
+  }
 
-    TestRunner.run(suite);
+  private class RecordIterator implements Iterator
+  {
+    public boolean hasNext()
+    {
+      try
+      {
+        reader.mark(1);
+        if (reader.read() != -1)
+        {
+          reader.reset();
+          return true;
+        }
+      }
+      catch (IOException e)
+      {
+        throw new RuntimeException("Error accessing the underlying datastream.", e);
+      }
+
+      return false;
+    }
+
+    public Object next()
+    {
+      Record result = null;
+
+      try
+      {
+        result = new Record(reader);
+      }
+      catch(IOException e)
+      {
+        throw new RuntimeException(e);
+      }
+      
+      return result;
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
   }
 }
