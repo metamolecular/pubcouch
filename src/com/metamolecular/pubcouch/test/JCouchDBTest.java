@@ -30,7 +30,6 @@ import java.util.Map;
 import junit.framework.TestCase;
 import org.jcouchdb.db.Database;
 import org.jcouchdb.exception.NotFoundException;
-import org.svenson.JSONParser;
 
 /**
  * Test to make sure we can connect to CouchDB.
