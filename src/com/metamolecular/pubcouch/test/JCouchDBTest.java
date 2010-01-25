@@ -23,29 +23,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.metamolecular.pubcouch.test;
 
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
+import java.util.HashMap;
+import java.util.Map;
+import junit.framework.TestCase;
+import org.jcouchdb.db.Database;
+import org.jcouchdb.exception.NotFoundException;
+import org.svenson.JSONParser;
 
 /**
+ * Test to make sure we can connect to CouchDB.
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class Main
+public class JCouchDBTest extends TestCase
 {
-  public static void main(String[] args) throws Exception
+
+  public void testConnect() throws Exception
   {
-    TestSuite suite = new TestSuite();
+    Database db = new Database("localhost", "jcouchdb");
+    Map<String, String> atts = new HashMap();
 
-    suite.addTestSuite(RecordTest.class);
-    suite.addTestSuite(RecordStreamerTest.class);
-    suite.addTestSuite(ArchiveTest.class);
-    suite.addTestSuite(SnapshotTest.class);
-    suite.addTestSuite(SequenceInputStreamTest.class);
-    suite.addTestSuite(JCouchDBTest.class);
+    atts.put("_id", "test-document");
+    atts.put("ultimate_answer", "42");
 
-    TestRunner.run(suite);
+    // not sure why db.createOrUpdateDocument gives 409...
+    try
+    {
+      db.delete(db.getDocument(HashMap.class, "test-document"));
+    }
+    catch (NotFoundException ignore)
+    {
+    }
+
+    db.createDocument(atts);
+    Map<String, String> doc = db.getDocument(HashMap.class, "test-document");
+
+    assertEquals(doc.get("ultimate_answer"), "42");
+    db.delete(doc);
+    assertTrue(db.listDocuments(null, null).getRows().isEmpty());
   }
 }
