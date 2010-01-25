@@ -25,7 +25,7 @@
  */
 
 
-package com.metamolecular.pubcouch.model;
+package com.metamolecular.pubcouch.record;
 
 /**
  *

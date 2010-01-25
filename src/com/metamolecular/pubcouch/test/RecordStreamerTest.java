@@ -25,12 +25,18 @@
  */
 package com.metamolecular.pubcouch.test;
 
-import com.metamolecular.pubcouch.model.RecordStreamer;
+import com.metamolecular.pubcouch.record.RecordStreamer;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import junit.framework.TestCase;
 
 /**
- *
+ * 
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
 public class RecordStreamerTest extends TestCase
@@ -51,8 +57,22 @@ public class RecordStreamerTest extends TestCase
     {
       records += Molfiles.benzene + "\n" + "$$$$\n";
     }
-    
+
     streamer = new RecordStreamer(new ByteArrayInputStream(records.getBytes("UTF-8")));
+  }
+
+  private void loadRecordsAsSeparateStreams(int count) throws Exception
+  {
+    List<InputStream> streams = new ArrayList();
+    String record = Molfiles.benzene + "\n$$$$\n";
+
+    for (int i = 0; i < count; i++)
+    {
+      streams.add(new ByteArrayInputStream(record.getBytes("UTF-8")));
+    }
+
+    InputStream stream = new SequenceInputStream(Collections.enumeration(streams));
+    streamer = new RecordStreamer(stream);
   }
 
   public void testNoRecordsDoesNotHaveNext() throws Exception
@@ -83,6 +103,20 @@ public class RecordStreamerTest extends TestCase
   public void testNextTwiceReturnsRecords() throws Exception
   {
     loadRecords(2);
+    assertEquals(Molfiles.benzene, streamer.iterator().next().getMolfile());
+    assertEquals(Molfiles.benzene, streamer.iterator().next().getMolfile());
+  }
+
+  public void testTwoRecordsAsSeparateStreamsHasNext() throws Exception
+  {
+    this.loadRecordsAsSeparateStreams(2);
+    Iterator it = streamer.iterator();
+    assertTrue(it.hasNext());
+  }
+
+  public void testTwoRecordsAsSeparateStreamsReturnsRecords() throws Exception
+  {
+    this.loadRecordsAsSeparateStreams(2);
     assertEquals(Molfiles.benzene, streamer.iterator().next().getMolfile());
     assertEquals(Molfiles.benzene, streamer.iterator().next().getMolfile());
   }

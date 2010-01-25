@@ -24,35 +24,72 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.model;
+package com.metamolecular.pubcouch.record;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import org.apache.commons.net.ftp.FTPClient;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Iterator;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public abstract class Service
+public class RecordStreamer implements Iterable<Record>
 {
-  private FTPClient client;
+  private BufferedReader reader;
 
-  public Service()
+  public RecordStreamer(InputStream stream)
   {
-    client = new FTPClient();
+    this.reader = new BufferedReader(new InputStreamReader(stream));
   }
 
-  public Service(FTPClient client)
+  public Iterator<Record> iterator()
   {
-    this.client = client;
+    return new RecordIterator();
   }
 
-  public void connect(String username, String password) throws IOException
+  private class RecordIterator implements Iterator
   {
-    client.connect("ftp.ncbi.nlm.nih.gov");
-    client.login(username, password);
-  }
+    public boolean hasNext()
+    {
+      try
+      {
+        reader.mark(1);
+        if (reader.read() != -1)
+        {
+          reader.reset();
+          return true;
+        }
+      }
+      catch (IOException e)
+      {
+        throw new RuntimeException("Error accessing the underlying datastream.", e);
+      }
 
-  public abstract RecordStreamer getStructures();
-  public abstract RecordStreamer getSubstances();
+      return false;
+    }
+
+    public Object next()
+    {
+      Record result = null;
+
+      try
+      {
+        result = new Record(reader);
+      }
+      catch(IOException e)
+      {
+        throw new RuntimeException(e);
+      }
+      
+      return result;
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
+  }
 }

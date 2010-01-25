@@ -23,73 +23,86 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.metamolecular.pubcouch.archive;
 
-package com.metamolecular.pubcouch.model;
-
-import java.io.BufferedReader;
+import com.metamolecular.pubcouch.record.RecordStreamer;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Iterator;
+import java.io.SequenceInputStream;
+import java.util.Enumeration;
+import java.util.zip.GZIPInputStream;
+import org.apache.commons.net.ftp.FTPClient;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class RecordStreamer implements Iterable
+public class Snapshot extends Archive
 {
-  private BufferedReader reader;
+  private static String STRUCTURE_DIR = "/pubchem/Substance/CURRENT-Full/SDF";
 
-  public RecordStreamer(InputStream stream)
+  public Snapshot()
   {
-    this.reader = new BufferedReader(new InputStreamReader(stream));
+    super();
   }
 
-  public Iterator<Record> iterator()
+  public Snapshot(FTPClient client)
   {
-    return new RecordIterator();
+    super(client);
   }
 
-  private class RecordIterator implements Iterator
+  @Override
+  public RecordStreamer getStructures() throws IOException
   {
-    public boolean hasNext()
+    client.changeWorkingDirectory(STRUCTURE_DIR);
+    InputStream stream = getStream();
+
+    return new RecordStreamer(stream);
+  }
+
+  @Override
+  public RecordStreamer getSubstances()
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public InputStream getStream() throws IOException
+  {
+    return new SequenceInputStream(new StreamEnumerator(client.listNames()));
+  }
+
+  private class StreamEnumerator implements Enumeration<InputStream>
+  {
+    private String[] filenames;
+    private int index;
+
+    private StreamEnumerator(String[] filenames)
     {
+      this.filenames = filenames;
+      this.index = 0;
+    }
+    public boolean hasMoreElements()
+    {
+      return index < filenames.length;
+    }
+
+    public InputStream nextElement()
+    {
+      InputStream result = null;
+
       try
       {
-        reader.mark(1);
-        if (reader.read() != -1)
-        {
-          reader.reset();
-          return true;
-        }
+        result = new GZIPInputStream(client.retrieveFileStream(filenames[index]));
       }
       catch (IOException e)
       {
-        throw new RuntimeException("Error accessing the underlying datastream.", e);
-      }
-
-      return false;
-    }
-
-    public Object next()
-    {
-      Record result = null;
-
-      try
-      {
-        result = new Record(reader);
-      }
-      catch(IOException e)
-      {
         throw new RuntimeException(e);
       }
-      
+
+      index++;
+
       return result;
     }
 
-    public void remove()
-    {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
   }
 }

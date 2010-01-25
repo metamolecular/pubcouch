@@ -26,25 +26,59 @@
 
 package com.metamolecular.pubcouch.test;
 
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
+import com.metamolecular.pubcouch.record.RecordStreamer;
+import com.metamolecular.pubcouch.archive.Archive;
+import junit.framework.TestCase;
+import mockit.Expectations;
+import mockit.Mocked;
+import org.apache.commons.net.ftp.FTPClient;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class Main
+public  class ArchiveTest extends TestCase
 {
-  public static void main(String[] args) throws Exception
+  @Mocked private FTPClient client;
+  private Archive archive;
+
+  @Override
+  protected void setUp() throws Exception
   {
-    TestSuite suite = new TestSuite();
+    archive = new DummyArchive(client);
+  }
 
-    suite.addTestSuite(RecordTest.class);
-    suite.addTestSuite(RecordStreamerTest.class);
-    suite.addTestSuite(ArchiveTest.class);
-    suite.addTestSuite(SnapshotTest.class);
-    suite.addTestSuite(SequenceInputStreamTest.class);
+  public void testConnectSetsUpConnection() throws Exception
+  {
+    new Expectations()
+    {
+      {
+        client.connect("ftp.ncbi.nlm.nih.gov");
+        client.login("user", "password");
+      }
+    };
 
-    TestRunner.run(suite);
+    archive.connect("user", "password");
+  }
+
+  private class DummyArchive extends Archive
+  {
+    private DummyArchive(FTPClient client)
+    {
+      super(client);
+    }
+
+    @Override
+    public RecordStreamer getStructures()
+    {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public RecordStreamer getSubstances()
+    {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
+
   }
 }

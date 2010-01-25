@@ -24,61 +24,36 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.test;
+package com.metamolecular.pubcouch.archive;
 
-import com.metamolecular.pubcouch.model.RecordStreamer;
-import com.metamolecular.pubcouch.model.Service;
-import junit.framework.TestCase;
-import mockit.Expectations;
-import mockit.Mocked;
+import com.metamolecular.pubcouch.record.RecordStreamer;
+import java.io.IOException;
 import org.apache.commons.net.ftp.FTPClient;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public  class ServiceTest extends TestCase
+public abstract class Archive
 {
-  @Mocked private FTPClient client;
-  private Service service;
+  protected FTPClient client;
 
-  @Override
-  protected void setUp() throws Exception
+  public Archive()
   {
-    service = new DummyService(client);
+    client = new FTPClient();
   }
 
-  public void testConnectSetsUpConnection() throws Exception
+  public Archive(FTPClient client)
   {
-    new Expectations()
-    {
-      {
-        client.connect("ftp.ncbi.nlm.nih.gov");
-        client.login("user", "password");
-      }
-    };
-
-    service.connect("user", "password");
+    this.client = client;
   }
 
-  private class DummyService extends Service
+  public void connect(String username, String password) throws IOException
   {
-    private DummyService(FTPClient client)
-    {
-      super(client);
-    }
-
-    @Override
-    public RecordStreamer getStructures()
-    {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public RecordStreamer getSubstances()
-    {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-
+    client.connect("ftp.ncbi.nlm.nih.gov");
+    client.login(username, password);
   }
+
+  public abstract RecordStreamer getStructures() throws IOException;
+  public abstract RecordStreamer getSubstances();
 }

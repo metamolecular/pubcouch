@@ -24,10 +24,11 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.model;
+package com.metamolecular.pubcouch.record;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -61,6 +62,11 @@ public class Record
   public String getMolfile()
   {
     return molfile;
+  }
+
+  public Collection<String> getKeys()
+  {
+    return properties.keySet();
   }
 
   public String get(String key)
@@ -119,7 +125,7 @@ public class Record
       throw new InvalidRecordException("Missing $$$$ record terminator.");
     }
 
-    String property = parseProperty(line);
+    String name = parseProperty(line);
     line = reader.readLine();
 
     while (!BLANK.equals(line))
@@ -133,7 +139,7 @@ public class Record
       }
     }
 
-    properties.put(property, buffer.toString());
+    properties.put(name, buffer.toString());
 
     return true;
   }

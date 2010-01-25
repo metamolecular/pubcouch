@@ -26,11 +26,12 @@
 
 package com.metamolecular.pubcouch.test;
 
-import com.metamolecular.pubcouch.model.InvalidRecordException;
-import com.metamolecular.pubcouch.model.Record;
+import com.metamolecular.pubcouch.record.InvalidRecordException;
+import com.metamolecular.pubcouch.record.Record;
 import java.io.BufferedReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Arrays;
 import junit.framework.TestCase;
 
 /**
@@ -95,6 +96,18 @@ public class RecordTest extends TestCase
     record = new Record(bufferedReader);
 
     assertEquals(Molfiles.benzene, record.getMolfile());
+  }
+
+  public void testIteratorIteratesAllPropertyNames() throws Exception
+  {
+    validRecord();
+
+    record = new Record(bufferedReader);
+    assertTrue(record.getKeys().containsAll(Arrays.asList(new String[]
+    {
+      "PUBCHEM_MOLECULAR_WEIGHT",
+      "PUBCHEM_COORDINATE_TYPE"
+    })));
   }
 
   public void testGetMolecularWeightReturns() throws Exception
