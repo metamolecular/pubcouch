@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.Enumeration;
 import java.util.zip.GZIPInputStream;
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
 /**
@@ -39,7 +40,9 @@ import org.apache.commons.net.ftp.FTPClient;
  */
 public class Snapshot extends Archive
 {
-  private static String STRUCTURE_DIR = "/pubchem/Substance/CURRENT-Full/SDF";
+
+  private static String SUBSTANCES_DIR = "/pubchem/Substance/CURRENT-Full/SDF";
+  private static String COMPOUNDS_DIR = "/pubchem/Compound/CURRENT-Full/SDF";
 
   public Snapshot()
   {
@@ -52,18 +55,20 @@ public class Snapshot extends Archive
   }
 
   @Override
-  public RecordStreamer getStructures() throws IOException
+  public RecordStreamer getCompounds() throws IOException
   {
-    client.changeWorkingDirectory(STRUCTURE_DIR);
+    client.changeWorkingDirectory(COMPOUNDS_DIR);
     InputStream stream = getStream();
 
     return new RecordStreamer(stream);
   }
 
   @Override
-  public RecordStreamer getSubstances()
+  public RecordStreamer getSubstances() throws IOException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    client.changeWorkingDirectory(SUBSTANCES_DIR);
+
+    return new RecordStreamer(getStream());
   }
 
   public InputStream getStream() throws IOException
@@ -73,6 +78,7 @@ public class Snapshot extends Archive
 
   private class StreamEnumerator implements Enumeration<InputStream>
   {
+
     private String[] filenames;
     private int index;
 
@@ -81,6 +87,7 @@ public class Snapshot extends Archive
       this.filenames = filenames;
       this.index = 0;
     }
+
     public boolean hasMoreElements()
     {
       return index < filenames.length;
@@ -88,10 +95,22 @@ public class Snapshot extends Archive
 
     public InputStream nextElement()
     {
+      try
+      {
+        if (index != 0)
+        {
+          client.completePendingCommand();
+        }
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+      }
       InputStream result = null;
 
       try
       {
+        client.setFileType(FTP.BINARY_FILE_TYPE);
         result = new GZIPInputStream(client.retrieveFileStream(filenames[index]));
       }
       catch (IOException e)
@@ -103,6 +122,5 @@ public class Snapshot extends Archive
 
       return result;
     }
-
   }
 }

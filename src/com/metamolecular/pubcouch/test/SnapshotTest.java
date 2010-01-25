@@ -37,9 +37,11 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.zip.GZIPOutputStream;
 import junit.framework.TestCase;
+import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
 /**
@@ -73,9 +75,9 @@ public class SnapshotTest extends TestCase
 
   // ftp.ncbi.nlm.nih.gov/pubchem/Substance/CURRENT-Full/SDF/Substance_00000001_00025000.sdf.gz
   // ftp.ncbi.nlm.nih.gov/pubchem/Compound/CURRENT-Full/SDF/Compound_00000001_00025000.sdf.gz
-  public void testGetStructuresChangesDirectory() throws Exception
+  public void testGetSubstancesChangesDirectory() throws Exception
   {
-    snapshot.getStructures();
+    snapshot.getSubstances();
 
     new Verifications()
     {
@@ -85,7 +87,38 @@ public class SnapshotTest extends TestCase
     };
   }
 
-  public void testGetStructuresStreamsAllRecords() throws Exception
+  public void testGetCompoundsChangesDirectory() throws Exception
+  {
+    snapshot.getCompounds();
+
+    new Verifications()
+    {
+      {
+        client.changeWorkingDirectory("/pubchem/Compound/CURRENT-Full/SDF");
+      }
+    };
+  }
+
+  public void testGetSubstancesSetsBinaryFileType() throws Exception
+  {
+    final String records = Molfiles.benzene + "\n$$$$\n";
+
+    new Expectations()
+    {
+      {
+        client.changeWorkingDirectory(anyString);
+        client.listNames();
+        result = new String[]{ "foo" };
+        client.setFileType(FTP.BINARY_FILE_TYPE);
+        client.retrieveFileStream(anyString);
+        result = new ByteArrayInputStream(zipStringToBytes(records));
+      }
+    };
+
+    snapshot.getCompounds();
+  }
+
+  public void testGetSubstancesStreamsAllRecords() throws Exception
   {
     final String records = Molfiles.benzene + "\n$$$$\n";
 
@@ -104,7 +137,7 @@ public class SnapshotTest extends TestCase
       }
     };
 
-    RecordStreamer streamer = snapshot.getStructures();
+    RecordStreamer streamer = snapshot.getCompounds();
     Iterator<Record> it = streamer.iterator();
     assertEquals(Molfiles.benzene, it.next().getMolfile());
     assertTrue(it.hasNext());

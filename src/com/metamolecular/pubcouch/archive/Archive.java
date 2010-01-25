@@ -54,6 +54,6 @@ public abstract class Archive
     client.login(username, password);
   }
 
-  public abstract RecordStreamer getStructures() throws IOException;
-  public abstract RecordStreamer getSubstances();
+  public abstract RecordStreamer getCompounds() throws IOException;
+  public abstract RecordStreamer getSubstances() throws IOException;
 }

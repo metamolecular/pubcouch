@@ -69,7 +69,7 @@ public  class ArchiveTest extends TestCase
     }
 
     @Override
-    public RecordStreamer getStructures()
+    public RecordStreamer getCompounds()
     {
       throw new UnsupportedOperationException("Not supported yet.");
     }

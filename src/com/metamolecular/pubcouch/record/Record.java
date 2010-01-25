@@ -45,7 +45,7 @@ public class Record
   private Pattern keyPattern;
   private static String BLANK = "";
   private String molfile = null;
-  private Map properties;
+  private Map<String, String> properties;
 
   public Record(BufferedReader reader) throws IOException
   {
@@ -128,10 +128,15 @@ public class Record
     String name = parseProperty(line);
     line = reader.readLine();
 
+//    System.out.println("Property: <" + name + ">");
+//    System.out.println("Line: <" + line + ">");
+
     while (!BLANK.equals(line))
     {
       buffer.append(line);
       line = reader.readLine();
+
+//      System.out.println("Line: <" + line + ">");
 
       if (!BLANK.equals(line))
       {
@@ -153,6 +158,13 @@ public class Record
       return matcher.group(1);
     }
 
-    throw new InvalidRecordException("Expected property line to start with >  <PROPERTY>. Got: " + line);
+    String propertyDump = "";
+    for (String name : properties.keySet())
+    {
+      propertyDump += "name: " + name + "\n" +
+        "value: " + properties.get(name) + "\n";
+    }
+
+    throw new InvalidRecordException("Expected property line to start with >  <PROPERTY>. Got: " + line + "\n" + propertyDump);
   }
 }

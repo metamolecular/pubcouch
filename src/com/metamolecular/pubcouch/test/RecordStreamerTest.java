@@ -41,7 +41,6 @@ import junit.framework.TestCase;
  */
 public class RecordStreamerTest extends TestCase
 {
-
   private RecordStreamer streamer;
   private String records;
 
