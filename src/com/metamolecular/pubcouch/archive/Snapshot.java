@@ -58,9 +58,8 @@ public class Snapshot extends Archive
   public RecordStreamer getCompounds() throws IOException
   {
     client.changeWorkingDirectory(COMPOUNDS_DIR);
-    InputStream stream = getStream();
 
-    return new RecordStreamer(stream);
+    return new RecordStreamer(getStream());
   }
 
   @Override
