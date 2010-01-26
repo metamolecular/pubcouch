@@ -45,6 +45,7 @@ public class Main
     suite.addTestSuite(SnapshotTest.class);
     suite.addTestSuite(SequenceInputStreamTest.class);
     suite.addTestSuite(JCouchDBTest.class);
+    suite.addTestSuite(PullTest.class);
 
     TestRunner.run(suite);
   }

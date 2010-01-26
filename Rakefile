@@ -12,7 +12,10 @@
 require 'java'
 Dir["lib/*.jar"].each { |jar| require jar }
 Dir["build/jar/*.jar"].each { |jar| require jar }
-java_import 'com.metamolecular.pubcouch.archive.Snapshot'
+java_import 'com.metamolecular.pubcouch.pubchem.Snapshot'
+java_import 'com.metamolecular.pubcouch.task.Pull'
+java_import 'org.jcouchdb.db.Database'
+java_import 'org.apache.commons.net.ftp.FTPClient'
 
 # For now, just connect and print the pubchem substance/compound id
 # for each record.
@@ -21,10 +24,19 @@ namespace :snapshot do
   task :pull do
     snapshot = Snapshot.new
     snapshot.connect 'anonymous', ''
-    streamer = snapshot.getCompounds
+    database = Database.new 'localhost', 'pubchem'
+
+    task = Pull.new database, snapshot.getCompounds
+    task.setMaxRecords 500
+    task.run
     
-    streamer.iterator.each do |record|
-      puts record.get("PUBCHEM_COMPOUND_CID")
-    end
+    # Need to do this if streamer is interrupted - don't know why
+    # (yet). For now it works.
+    snapshot.disconnect
+    snapshot.connect 'anonymous', ''
+    
+    task = Pull.new database, snapshot.getSubstances
+    task.setMaxRecords 500
+    task.run
   end
 end

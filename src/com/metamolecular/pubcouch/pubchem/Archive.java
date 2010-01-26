@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.archive;
+package com.metamolecular.pubcouch.pubchem;
 
 import com.metamolecular.pubcouch.record.RecordStreamer;
 import java.io.IOException;
@@ -52,6 +52,11 @@ public abstract class Archive
   {
     client.connect("ftp.ncbi.nlm.nih.gov");
     client.login(username, password);
+  }
+
+  public void disconnect() throws IOException
+  {
+    client.disconnect();
   }
 
   public abstract RecordStreamer getCompounds() throws IOException;

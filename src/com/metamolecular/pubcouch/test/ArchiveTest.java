@@ -27,7 +27,7 @@
 package com.metamolecular.pubcouch.test;
 
 import com.metamolecular.pubcouch.record.RecordStreamer;
-import com.metamolecular.pubcouch.archive.Archive;
+import com.metamolecular.pubcouch.pubchem.Archive;
 import junit.framework.TestCase;
 import mockit.Expectations;
 import mockit.Mocked;

@@ -24,79 +24,71 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.record;
+package com.metamolecular.pubcouch.test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Iterator;
+import com.metamolecular.pubcouch.record.RecordStreamer;
+import com.metamolecular.pubcouch.task.Pull;
+import java.io.ByteArrayInputStream;
+import junit.framework.TestCase;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import org.jcouchdb.db.Database;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class RecordStreamer implements Iterable<Record>
+public class PullTest extends TestCase
 {
-  private BufferedReader reader;
-  private InputStream stream;
+  private Pull pull;
+  private RecordStreamer streamer;
+  @Mocked
+  private Database db;
 
-  public RecordStreamer(InputStream stream)
+  private void loadRecords(int count) throws Exception
   {
-    this.stream = stream;
-    this.reader = new BufferedReader(new InputStreamReader(stream));
-  }
+    String records = "";
 
-  public Iterator<Record> iterator()
-  {
-    return new RecordIterator();
-  }
-
-  public void close() throws IOException
-  {
-    stream.close();
-  }
-
-  private class RecordIterator implements Iterator
-  {
-    public boolean hasNext()
+    for (int i = 0; i < count; i++)
     {
-      try
-      {
-        reader.mark(1);
-        if (reader.read() != -1)
-        {
-          reader.reset();
-          return true;
-        }
-      }
-      catch (IOException e)
-      {
-        throw new RuntimeException("Error accessing the underlying datastream.", e);
-      }
-
-      return false;
+      records += Molfiles.benzene + "\n" +
+      "> <PUBCHEM_COMPOUND_CID>\n" +
+      "1234\n\n" +
+      "$$$$\n";
     }
 
-    public Object next()
-    {
-      Record result = null;
+    ByteArrayInputStream stream = new ByteArrayInputStream(records.getBytes("UTF-8"));
+    streamer = new RecordStreamer(stream);
+  }
 
-      try
-      {
-        result = new Record(reader);
-      }
-      catch(IOException e)
-      {
-        throw new RuntimeException(e);
-      }
-      
-      return result;
-    }
+  public void testRunCreatesMax2Records() throws Exception
+  {
+    loadRecords(10);
 
-    public void remove()
+    new NonStrictExpectations()
     {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
+      {
+        db.createDocument(any); times = 2;
+      }
+    };
+
+    pull = new Pull(db, streamer);
+    pull.setMaxRecords(2);
+    pull.run();
+  }
+
+  public void testRunCreatesAllRecordsByDefault() throws Exception
+  {
+    loadRecords(10);
+
+    new NonStrictExpectations()
+    {
+      {
+        db.createDocument(any); times = 10;
+      }
+    };
+
+    pull = new Pull(db, streamer);
+    pull.run();
   }
 }

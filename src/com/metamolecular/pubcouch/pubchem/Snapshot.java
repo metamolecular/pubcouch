@@ -23,7 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.metamolecular.pubcouch.archive;
+package com.metamolecular.pubcouch.pubchem;
 
 import com.metamolecular.pubcouch.record.RecordStreamer;
 import java.io.IOException;
@@ -68,6 +68,11 @@ public class Snapshot extends Archive
     client.changeWorkingDirectory(SUBSTANCES_DIR);
 
     return new RecordStreamer(getStream());
+  }
+
+  public boolean completePendingCommand() throws IOException
+  {
+    return client.completePendingCommand();
   }
 
   public InputStream getStream() throws IOException

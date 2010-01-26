@@ -27,7 +27,7 @@ package com.metamolecular.pubcouch.test;
 
 import com.metamolecular.pubcouch.record.Record;
 import com.metamolecular.pubcouch.record.RecordStreamer;
-import com.metamolecular.pubcouch.archive.Snapshot;
+import com.metamolecular.pubcouch.pubchem.Snapshot;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
