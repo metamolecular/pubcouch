@@ -26,7 +26,7 @@
 
 package com.metamolecular.pubcouch.test;
 
-import com.metamolecular.pubcouch.record.RecordStreamer;
+import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
 import com.metamolecular.pubcouch.pubchem.Archive;
 import junit.framework.TestCase;
 import mockit.Expectations;
@@ -69,13 +69,13 @@ public  class ArchiveTest extends TestCase
     }
 
     @Override
-    public RecordStreamer getCompounds()
+    public DefaultRecordStreamer getCompounds()
     {
       throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public RecordStreamer getSubstances()
+    public DefaultRecordStreamer getSubstances()
     {
       throw new UnsupportedOperationException("Not supported yet.");
     }

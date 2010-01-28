@@ -23,71 +23,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.metamolecular.pubcouch.filter;
 
-package com.metamolecular.pubcouch.task;
-
-import com.metamolecular.pubcouch.document.DocumentWriter;
-import com.metamolecular.pubcouch.document.VerbatimDocumentWriter;
-import com.metamolecular.pubcouch.filter.CompositeFilter;
-import com.metamolecular.pubcouch.filter.CountingFilter;
-import com.metamolecular.pubcouch.record.FilterRecordStreamer;
 import com.metamolecular.pubcouch.record.Record;
-import com.metamolecular.pubcouch.record.RecordStreamer;
-import java.util.HashMap;
-import java.util.Map;
-import org.jcouchdb.db.Database;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class Pull
+public class PubChemIDFilter
 {
+
   private static String CID_PREFIX = "C";
   private static String SID_PREFIX = "S";
   private static String PUBCHEM_COMPOUND_CID = "PUBCHEM_COMPOUND_CID";
   private static String PUBCHEM_SUBSTANCE_ID = "PUBCHEM_SUBSTANCE_ID";
   private static String ID = "_id";
-  private Database db;
-  private RecordStreamer streamer;
-  private CompositeFilter filter;
-  private DocumentWriter writer;
 
-  public Pull(Database db, RecordStreamer streamer, int count)
+  public PubChemIDFilter()
   {
-    this.filter = new CompositeFilter();
-    this.filter.addFilter(new CountingFilter(count));
-    this.db = db;
-    this.streamer = new FilterRecordStreamer(streamer, filter);
-    this.writer = new VerbatimDocumentWriter();
   }
 
-  public void run()
+  public boolean pass(Record record)
   {
-    Map<String, Object> atts = new HashMap();
+//    for (String key : record.getKeys())
+//    {
+//      atts.put("MOLFILE", record.getMolfile());
+//      atts.put(key, record.get(key));
+//    }
+//
+//    String cid = null;
+//    String sid = null;
+//
+//    if ((cid = atts.get(PUBCHEM_COMPOUND_CID)) != null)
+//    {
+//      atts.put(ID, CID_PREFIX + cid);
+//    }
+//    else if ((sid = atts.get(PUBCHEM_SUBSTANCE_ID)) != null)
+//    {
+//      atts.put(ID, SID_PREFIX + sid);
+//    }
+//    else
+//    {
+//      throw new RuntimeException("Cant't determine document type for " + atts);
+//    }
+//
+//    db.createDocument(atts);
+//    atts.clear();
 
-    for (Record record : streamer)
-    {
-      writer.write(record, atts);
-
-      String cid = null;
-      String sid = null;
-
-      if ((cid = record.get(PUBCHEM_COMPOUND_CID)) != null)
-      {
-        atts.put(ID, CID_PREFIX + cid);
-      }
-      else if ((sid = record.get(PUBCHEM_SUBSTANCE_ID)) != null)
-      {
-        atts.put(ID, SID_PREFIX + sid);
-      }
-      else
-      {
-        throw new RuntimeException("Can't determine document type for " + atts);
-      }
-
-      db.createDocument(atts);
-      atts.clear();
-    }
+    return true;
   }
 }

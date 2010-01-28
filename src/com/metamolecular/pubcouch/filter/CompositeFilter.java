@@ -23,16 +23,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.metamolecular.pubcouch.filter;
 
-package com.metamolecular.pubcouch.record;
-
-import org.jcouchdb.db.Database;
+import com.metamolecular.pubcouch.record.Record;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public interface RecordCompiler
+public class CompositeFilter implements RecordFilter
 {
-  public void compile(Database db, Record record);
+  private List<RecordFilter> filters;
+
+  public CompositeFilter()
+  {
+    this.filters = new ArrayList();
+  }
+
+  public void addFilter(RecordFilter filter)
+  {
+    filters.add(filter);
+  }
+
+  public boolean pass(Record record)
+  {
+    for (RecordFilter filter : filters)
+    {
+      if (!filter.pass(record))
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public boolean abort()
+  {
+    for (RecordFilter filter : filters)
+    {
+      if (filter.abort())
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
 }

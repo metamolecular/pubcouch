@@ -24,41 +24,16 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.pubchem;
+package com.metamolecular.pubcouch.document;
 
-import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
-import java.io.IOException;
-import org.apache.commons.net.ftp.FTPClient;
+import com.metamolecular.pubcouch.record.Record;
+import java.util.Map;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public abstract class Archive
+public interface DocumentWriter
 {
-  protected FTPClient client;
-
-  public Archive()
-  {
-    client = new FTPClient();
-  }
-
-  public Archive(FTPClient client)
-  {
-    this.client = client;
-  }
-
-  public void connect(String username, String password) throws IOException
-  {
-    client.connect("ftp.ncbi.nlm.nih.gov");
-    client.login(username, password);
-  }
-
-  public void disconnect() throws IOException
-  {
-    client.disconnect();
-  }
-
-  public abstract DefaultRecordStreamer getCompounds() throws IOException;
-  public abstract DefaultRecordStreamer getSubstances() throws IOException;
+  public void write(Record record, Map<String, Object> doc);
 }

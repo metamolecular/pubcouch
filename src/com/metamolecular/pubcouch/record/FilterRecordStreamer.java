@@ -24,41 +24,73 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.pubchem;
+package com.metamolecular.pubcouch.record;
 
-import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
-import java.io.IOException;
-import org.apache.commons.net.ftp.FTPClient;
+import com.metamolecular.pubcouch.filter.RecordFilter;
+import java.util.Iterator;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public abstract class Archive
+public class FilterRecordStreamer implements RecordStreamer
 {
-  protected FTPClient client;
+  private RecordStreamer streamer;
+  private RecordFilter filter;
 
-  public Archive()
+  public FilterRecordStreamer(RecordStreamer streamer, RecordFilter filter)
   {
-    client = new FTPClient();
+    this.streamer = streamer;
+    this.filter = filter;
+  }
+  
+  public Iterator<Record> iterator()
+  {
+    return new RecordIterator();
   }
 
-  public Archive(FTPClient client)
+  private class RecordIterator implements Iterator
   {
-    this.client = client;
-  }
+    private Iterator<Record> iterator;
+    private Record next;
 
-  public void connect(String username, String password) throws IOException
-  {
-    client.connect("ftp.ncbi.nlm.nih.gov");
-    client.login(username, password);
-  }
+    private RecordIterator()
+    {
+      this.iterator = streamer.iterator();
+      advance();
+    }
 
-  public void disconnect() throws IOException
-  {
-    client.disconnect();
-  }
+    public boolean hasNext()
+    {
+      return next != null;
+    }
 
-  public abstract DefaultRecordStreamer getCompounds() throws IOException;
-  public abstract DefaultRecordStreamer getSubstances() throws IOException;
+    public Object next()
+    {
+      Record result = next;
+      advance();
+      return result;
+    }
+
+    public void remove()
+    {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    private void advance()
+    {
+      this.next = null;
+
+      while (iterator.hasNext())
+      {
+        Record test = iterator.next();
+
+        if (filter.pass(test))
+        {
+          this.next = test;
+          break;
+        }
+      }
+    }
+  }
 }

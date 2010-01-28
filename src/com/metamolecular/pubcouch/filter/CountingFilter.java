@@ -24,41 +24,44 @@
  * THE SOFTWARE.
  */
 
-package com.metamolecular.pubcouch.pubchem;
+package com.metamolecular.pubcouch.filter;
 
-import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
-import java.io.IOException;
-import org.apache.commons.net.ftp.FTPClient;
+import com.metamolecular.pubcouch.record.Record;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public abstract class Archive
+public class CountingFilter implements RecordFilter
 {
-  protected FTPClient client;
+  private int maxRecords;
+  private int count;
 
-  public Archive()
+  public CountingFilter(int maxRecords)
   {
-    client = new FTPClient();
+    this.maxRecords = maxRecords;
+    this.count = 0;
   }
 
-  public Archive(FTPClient client)
+  public void setMaxRecords(int maxRecords)
   {
-    this.client = client;
+    this.maxRecords = maxRecords;
   }
 
-  public void connect(String username, String password) throws IOException
+  public boolean pass(Record record)
   {
-    client.connect("ftp.ncbi.nlm.nih.gov");
-    client.login(username, password);
+    if (count == maxRecords)
+    {
+      return false;
+    }
+
+    count++;
+
+    return true;
   }
 
-  public void disconnect() throws IOException
+  public boolean abort()
   {
-    client.disconnect();
+    return count == maxRecords;
   }
-
-  public abstract DefaultRecordStreamer getCompounds() throws IOException;
-  public abstract DefaultRecordStreamer getSubstances() throws IOException;
 }

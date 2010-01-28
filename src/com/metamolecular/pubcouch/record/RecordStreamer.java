@@ -26,77 +26,13 @@
 
 package com.metamolecular.pubcouch.record;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Iterator;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class RecordStreamer implements Iterable<Record>
+public interface RecordStreamer extends Iterable<Record>
 {
-  private BufferedReader reader;
-  private InputStream stream;
-
-  public RecordStreamer(InputStream stream)
-  {
-    this.stream = stream;
-    this.reader = new BufferedReader(new InputStreamReader(stream));
-  }
-
-  public Iterator<Record> iterator()
-  {
-    return new RecordIterator();
-  }
-
-  public void close() throws IOException
-  {
-    stream.close();
-  }
-
-  private class RecordIterator implements Iterator
-  {
-    public boolean hasNext()
-    {
-      try
-      {
-        reader.mark(1);
-        if (reader.read() != -1)
-        {
-          reader.reset();
-          return true;
-        }
-      }
-      catch (IOException e)
-      {
-        throw new RuntimeException("Error accessing the underlying datastream.", e);
-      }
-
-      return false;
-    }
-
-    public Object next()
-    {
-      Record result = null;
-
-      try
-      {
-        result = new Record(reader);
-      }
-      catch(IOException e)
-      {
-        throw new RuntimeException(e);
-      }
-      
-      return result;
-    }
-
-    public void remove()
-    {
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-  }
+  public Iterator<Record> iterator();
 }

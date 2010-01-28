@@ -25,7 +25,7 @@
  */
 package com.metamolecular.pubcouch.pubchem;
 
-import com.metamolecular.pubcouch.record.RecordStreamer;
+import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
@@ -55,19 +55,19 @@ public class Snapshot extends Archive
   }
 
   @Override
-  public RecordStreamer getCompounds() throws IOException
+  public DefaultRecordStreamer getCompounds() throws IOException
   {
     client.changeWorkingDirectory(COMPOUNDS_DIR);
 
-    return new RecordStreamer(getStream());
+    return new DefaultRecordStreamer(getStream());
   }
 
   @Override
-  public RecordStreamer getSubstances() throws IOException
+  public DefaultRecordStreamer getSubstances() throws IOException
   {
     client.changeWorkingDirectory(SUBSTANCES_DIR);
 
-    return new RecordStreamer(getStream());
+    return new DefaultRecordStreamer(getStream());
   }
 
   public boolean completePendingCommand() throws IOException

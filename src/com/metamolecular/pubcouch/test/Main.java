@@ -40,7 +40,8 @@ public class Main
     TestSuite suite = new TestSuite();
 
     suite.addTestSuite(RecordTest.class);
-    suite.addTestSuite(RecordStreamerTest.class);
+    suite.addTestSuite(DefaultRecordStreamerTest.class);
+    suite.addTestSuite(FilterRecordStreamerTest.class);
     suite.addTestSuite(ArchiveTest.class);
     suite.addTestSuite(SnapshotTest.class);
     suite.addTestSuite(SequenceInputStreamTest.class);

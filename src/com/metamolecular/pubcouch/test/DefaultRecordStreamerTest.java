@@ -25,7 +25,7 @@
  */
 package com.metamolecular.pubcouch.test;
 
-import com.metamolecular.pubcouch.record.RecordStreamer;
+import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
@@ -39,9 +39,9 @@ import junit.framework.TestCase;
  * 
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class RecordStreamerTest extends TestCase
+public class DefaultRecordStreamerTest extends TestCase
 {
-  private RecordStreamer streamer;
+  private DefaultRecordStreamer streamer;
   private String records;
 
   @Override
@@ -57,7 +57,7 @@ public class RecordStreamerTest extends TestCase
       records += Molfiles.benzene + "\n" + "$$$$\n";
     }
 
-    streamer = new RecordStreamer(new ByteArrayInputStream(records.getBytes("UTF-8")));
+    streamer = new DefaultRecordStreamer(new ByteArrayInputStream(records.getBytes("UTF-8")));
   }
 
   private void loadRecordsAsSeparateStreams(int count) throws Exception
@@ -71,7 +71,7 @@ public class RecordStreamerTest extends TestCase
     }
 
     InputStream stream = new SequenceInputStream(Collections.enumeration(streams));
-    streamer = new RecordStreamer(stream);
+    streamer = new DefaultRecordStreamer(stream);
   }
 
   public void testNoRecordsDoesNotHaveNext() throws Exception

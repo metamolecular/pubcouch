@@ -26,7 +26,7 @@
 
 package com.metamolecular.pubcouch.test;
 
-import com.metamolecular.pubcouch.record.RecordStreamer;
+import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
 import com.metamolecular.pubcouch.task.Pull;
 import java.io.ByteArrayInputStream;
 import junit.framework.TestCase;
@@ -41,7 +41,7 @@ import org.jcouchdb.db.Database;
 public class PullTest extends TestCase
 {
   private Pull pull;
-  private RecordStreamer streamer;
+  private DefaultRecordStreamer streamer;
   @Mocked
   private Database db;
 
@@ -58,7 +58,7 @@ public class PullTest extends TestCase
     }
 
     ByteArrayInputStream stream = new ByteArrayInputStream(records.getBytes("UTF-8"));
-    streamer = new RecordStreamer(stream);
+    streamer = new DefaultRecordStreamer(stream);
   }
 
   public void testRunCreatesMax2Records() throws Exception
@@ -72,8 +72,7 @@ public class PullTest extends TestCase
       }
     };
 
-    pull = new Pull(db, streamer);
-    pull.setMaxRecords(2);
+    pull = new Pull(db, streamer, 2);
     pull.run();
   }
 
@@ -88,7 +87,7 @@ public class PullTest extends TestCase
       }
     };
 
-    pull = new Pull(db, streamer);
+    pull = new Pull(db, streamer, -1);
     pull.run();
   }
 }

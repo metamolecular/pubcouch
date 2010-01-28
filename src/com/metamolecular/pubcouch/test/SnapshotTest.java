@@ -26,7 +26,7 @@
 package com.metamolecular.pubcouch.test;
 
 import com.metamolecular.pubcouch.record.Record;
-import com.metamolecular.pubcouch.record.RecordStreamer;
+import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
 import com.metamolecular.pubcouch.pubchem.Snapshot;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -137,7 +137,7 @@ public class SnapshotTest extends TestCase
       }
     };
 
-    RecordStreamer streamer = snapshot.getCompounds();
+    DefaultRecordStreamer streamer = snapshot.getCompounds();
     Iterator<Record> it = streamer.iterator();
     assertEquals(Molfiles.benzene, it.next().getMolfile());
     assertTrue(it.hasNext());

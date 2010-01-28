@@ -23,42 +23,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.metamolecular.pubcouch.document;
 
-package com.metamolecular.pubcouch.pubchem;
-
-import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
-import java.io.IOException;
-import org.apache.commons.net.ftp.FTPClient;
+import com.metamolecular.pubcouch.record.Record;
+import java.util.Map;
 
 /**
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public abstract class Archive
+public class VerbatimDocumentWriter implements DocumentWriter
 {
-  protected FTPClient client;
-
-  public Archive()
+  public void write(Record record, Map<String, Object> doc)
   {
-    client = new FTPClient();
+    doc.put("MOLFILE", record.getMolfile());
+    
+    for (String key : record.getKeys())
+    {
+      doc.put(key, record.get(key));
+    }
   }
-
-  public Archive(FTPClient client)
-  {
-    this.client = client;
-  }
-
-  public void connect(String username, String password) throws IOException
-  {
-    client.connect("ftp.ncbi.nlm.nih.gov");
-    client.login(username, password);
-  }
-
-  public void disconnect() throws IOException
-  {
-    client.disconnect();
-  }
-
-  public abstract DefaultRecordStreamer getCompounds() throws IOException;
-  public abstract DefaultRecordStreamer getSubstances() throws IOException;
 }
