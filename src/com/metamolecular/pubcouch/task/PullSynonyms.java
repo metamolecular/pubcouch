@@ -116,7 +116,7 @@ public class PullSynonyms
     }
 
     doc.put("submitter", record.get(PUBCHEM_EXT_DATASOURCE_NAME));
-    doc.put("pubchem_substance_id", record.get(PUBCHEM_SUBSTANCE_ID));
+    doc.put("sid", record.get(PUBCHEM_SUBSTANCE_ID));
     doc.put("uri", record.get(PUBCHEM_EXT_SUBSTANCE_URL));
 
     String cidAssociationsField = record.get(PUBCHEM_CID_ASSOCIATIONS);
@@ -136,7 +136,7 @@ public class PullSynonyms
       }
     }
 
-    doc.put("pubchem_compound_id", cid);
+    doc.put("cid", cid);
 
     for (String synonym : synonyms)
     {
