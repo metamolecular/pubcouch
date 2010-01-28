@@ -40,7 +40,7 @@ desc "Pull synonyms from FTP as abbreviated Substance Records"
 namespace :synonyms do
   task :pull do
     task = PullSynonyms.new 'localhost', 'synonyms'
-    task.setMaxRecords 5000
+    task.setMaxRecords -1
     
     task.run
   end

@@ -101,7 +101,7 @@ public class PullSynonyms
     public boolean pass(Record record)
     {
       String field = record.get(PUBCHEM_GENERIC_REGISTRY_NAME);
-      System.out.println("testing..." + field);
+      System.out.println(record.get(PUBCHEM_SUBSTANCE_ID) + ": synonym: " + field);
       return field != null;
     }
   }
