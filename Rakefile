@@ -25,6 +25,7 @@ Dir["lib/*.jar"].each { |jar| require jar }
 Dir["build/jar/*.jar"].each { |jar| require jar }
 java_import 'com.metamolecular.pubcouch.pubchem.Snapshot'
 java_import 'com.metamolecular.pubcouch.task.PullSynonyms'
+java_import 'com.metamolecular.pubcouch.task.PullCompounds'
 java_import 'com.metamolecular.pubcouch.task.Pull'
 java_import 'org.jcouchdb.db.Database'
 java_import 'org.apache.commons.net.ftp.FTPClient'
@@ -40,6 +41,15 @@ namespace :synonyms do
   task :pull do
     task = PullSynonyms.new 'localhost', 'synonyms'
     task.setMaxRecords 5000
+    
+    task.run
+  end
+end
+
+desc "Pull compound representations from FTP and add to synonyms database"
+namespace :compounds do
+  task :pull do
+    task = PullCompounds.new 'localhost', 'synonyms'
     
     task.run
   end
