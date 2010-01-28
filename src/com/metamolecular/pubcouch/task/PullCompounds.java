@@ -79,7 +79,7 @@ public class PullCompounds
 
     for (ValueRow<Map> vr : rows)
     {
-      String cid = (String) vr.getValue().get("pubchem_compound_id");
+      String cid = (String) vr.getValue().get("cid");
 
 //      System.out.println(cid);
 
