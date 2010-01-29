@@ -61,4 +61,5 @@ public abstract class Archive
 
   public abstract DefaultRecordStreamer getCompounds() throws IOException;
   public abstract DefaultRecordStreamer getSubstances() throws IOException;
+  public abstract DefaultRecordStreamer getSubstances(int beginAfter) throws IOException;
 }

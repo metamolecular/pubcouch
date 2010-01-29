@@ -90,6 +90,23 @@ public class PullSynonyms
     }
   }
 
+  public void run(int beginAfter) throws IOException
+  {
+    FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getSubstances(beginAfter), compositeFilter);
+    Map<String, String> doc = new HashMap();
+    Set<String> synonyms = new HashSet();
+
+    for (Record record : streamer)
+    {
+      writeDocuments(record, synonyms, doc);
+
+      if (compositeFilter.abort())
+      {
+        break;
+      }
+    }
+  }
+
   private class SynonymFilter implements RecordFilter
   {
 

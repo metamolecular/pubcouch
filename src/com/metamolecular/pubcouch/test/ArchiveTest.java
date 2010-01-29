@@ -28,6 +28,7 @@ package com.metamolecular.pubcouch.test;
 
 import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
 import com.metamolecular.pubcouch.pubchem.Archive;
+import java.io.IOException;
 import junit.framework.TestCase;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -80,5 +81,10 @@ public  class ArchiveTest extends TestCase
       throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public DefaultRecordStreamer getSubstances(int beginAfter) throws IOException
+    {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
   }
 }

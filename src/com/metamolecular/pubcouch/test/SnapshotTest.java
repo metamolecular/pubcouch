@@ -32,8 +32,6 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.zip.GZIPOutputStream;
 import junit.framework.TestCase;
@@ -54,7 +52,6 @@ public class SnapshotTest extends TestCase
   private Snapshot snapshot;
   @Mocked
   private FTPClient client;
-  private Enumeration<InputStream> chunks;
 
   @Override
   protected void setUp() throws Exception
@@ -144,5 +141,48 @@ public class SnapshotTest extends TestCase
     assertEquals(Molfiles.benzene, it.next().getMolfile());
     assertEquals(Molfiles.benzene, it.next().getMolfile());
     assertFalse(it.hasNext());
+  }
+
+  public void testGetSubstancesStreamsFromSID() throws Exception
+  {
+    final String chunk1 =
+            Molfiles.benzene + "\n"+
+            "> <PUBCHEM_SUBSTANCE_ID>\n" +
+            "53000\n" +
+            "\n$$$$\n" +
+            Molfiles.benzene + "\n"+
+            "> <PUBCHEM_SUBSTANCE_ID>\n" +
+            "53001\n" +
+            "\n$$$$\n";
+    final String chunk2 =
+            Molfiles.benzene + "\n"+
+            "> <PUBCHEM_SUBSTANCE_ID>\n" +
+            "75001\n" +
+            "\n$$$$\n";
+
+    new NonStrictExpectations()
+    {
+      {
+        client.listNames();
+        result = new String[]
+        {
+          "Substance_00000001_00025000.sdf.gz",
+          "Substance_00025001_00050000.sdf.gz",
+          "Substance_00050001_00075000.sdf.gz",
+          "Substance_00075001_00100000.sdf.gz"
+//          "Substance_0"
+        };
+        client.retrieveFileStream("Substance_00050001_00075000.sdf.gz");
+        result = new ByteArrayInputStream(zipStringToBytes(chunk1));
+        client.retrieveFileStream("Substance_00075001_00100000.sdf.gz");
+        result = new ByteArrayInputStream(zipStringToBytes(chunk2));
+      }
+    };
+
+    DefaultRecordStreamer streamer = snapshot.getSubstances(53000);
+    Iterator<Record> it = streamer.iterator();
+    assertTrue(it.hasNext());
+    assertEquals("53001", it.next().get("PUBCHEM_SUBSTANCE_ID"));
+    assertTrue(it.hasNext());
   }
 }

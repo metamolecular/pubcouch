@@ -26,6 +26,7 @@
 package com.metamolecular.pubcouch.test;
 
 import com.metamolecular.pubcouch.record.DefaultRecordStreamer;
+import com.metamolecular.pubcouch.record.Record;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
@@ -105,6 +106,28 @@ public class DefaultRecordStreamerTest extends TestCase
     assertEquals(Molfiles.benzene, streamer.iterator().next().getMolfile());
     assertEquals(Molfiles.benzene, streamer.iterator().next().getMolfile());
   }
+
+//  public void testNextUsingKeyValueAdvancesIntoRecords() throws Exception
+//  {
+//    final String chunk =
+//            Molfiles.benzene + "\n"+
+//            "> <PUBCHEM_SUBSTANCE_ID>\n" +
+//            "6501\n" +
+//            "\n$$$$\n" +
+//            Molfiles.benzene + "\n"+
+//            "> <PUBCHEM_SUBSTANCE_ID>\n" +
+//            "6502\n" +
+//            "\n$$$$\n" +
+//            Molfiles.benzene + "\n"+
+//            "> <PUBCHEM_SUBSTANCE_ID>\n" +
+//            "6503\n" +
+//            "\n$$$$\n";
+//
+//    streamer = new DefaultRecordStreamer(new ByteArrayInputStream(chunk.getBytes("UTF-8")), "PUBCHEM_SUBSTANCE_ID", "6503");
+//    Iterator<Record> it = streamer.iterator();
+//
+//    assertTrue(it.hasNext());
+//  }
 
   public void testTwoRecordsAsSeparateStreamsHasNext() throws Exception
   {

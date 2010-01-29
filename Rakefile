@@ -9,16 +9,26 @@
 # Usage:
 # $ jruby -S rake snapshot:pull
 
-# function(doc) {
-#   if(doc.PUBCHEM_GENERIC_REGISTRY_NAME == '14797-55-8') {
-#     emit(null, {
-#       molfile: doc.MOLFILE,
-#       url: doc.PUBCHEM_EXT_SUBSTANCE_URL,
-#       sid: doc.PUBCHEM_SUBSTANCE_ID,
-#       synonym: doc.PUBCHEM_SUBSTANCE_SYNONYM
-#     });
-#   }
+# CID Views:
+# first 25 rows
+# http://localhost:5984/synonyms/_view/cids/byID?limit=25
+#
+# first 25 rows starting with ID=0000815ada259d49d0cab0deff005092
+# http://192.168.1.100:5984/synonyms/_view/cids/byID?limit=25&startkey="0000815ada259d49d0cab0deff005092"
+# {
+#    "_id": "_design/cids",
+#    "_rev": "5-d51745246fd56df0925ca01aa47a6e81",
+#    "language": "javascript",
+#    "views": {
+#        "all": {
+#            "map": "function(doc) { if (doc.cid !== null){emit(doc.cid, doc)}}"
+#        },
+#        "byID": {
+#            "map": "function(doc) { emit(doc._id, doc) }"
+#        }
+#    }
 # }
+
 
 require 'java'
 Dir["lib/*.jar"].each { |jar| require jar }
@@ -40,9 +50,9 @@ desc "Pull synonyms from FTP as abbreviated Substance Records"
 namespace :synonyms do
   task :pull do
     task = PullSynonyms.new 'localhost', 'synonyms'
-    task.setMaxRecords -1
+    task.setMaxRecords 10
     
-    task.run
+    task.run(26074989)
   end
 end
 
@@ -50,6 +60,7 @@ desc "Pull compound representations from FTP and add to synonyms database"
 namespace :compounds do
   task :pull do
     task = PullCompounds.new 'localhost', 'synonyms'
+    task.setMaxRecords -1
     
     task.run
   end

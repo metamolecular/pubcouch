@@ -35,6 +35,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Map;
 import org.jcouchdb.db.Database;
+import org.jcouchdb.db.Options;
 import org.jcouchdb.document.ValueRow;
 import org.jcouchdb.document.ViewResult;
 
@@ -73,6 +74,55 @@ public class PullCompounds
 
   private void markCompounds()
   {
+    Options options = new Options();
+    options.put("limit", 101);
+    ViewResult<Map> result = db.queryView("cids/byID", Map.class, options, null);
+    List<ValueRow<Map>> rows = result.getRows();
+
+    while (rows.size() > 0)
+    {
+      for (int i = 0; i < rows.size() - 1; i++)
+      {
+        ValueRow<Map> vr = rows.get(i);
+        String cid = (String) vr.getValue().get("cid");
+
+        try
+        {
+          System.out.println("marking: " + cid);
+          bitSet.set(Integer.parseInt(cid));
+        }
+        catch (Exception e)
+        {
+//        e.printStackTrace();
+        System.out.println("ERROR parsing:" + vr.getId());
+        }
+      }
+
+      if (rows.size() < 101)
+      {
+        break;
+      }
+
+      ValueRow<Map> lastRow = rows.get(rows.size() - 1);
+
+      options.put("startkey", lastRow.getValue().get("_id"));
+
+      System.out.println("options=" + options);
+
+      result = db.queryView("cids/byID", Map.class, options, null);
+      rows = result.getRows();
+    }
+
+
+  }
+
+  private void markCompounds2()
+  {
+    Options options = new Options();
+    options.put("limit", 101);
+    db.queryView("cids/byID", Map.class, options, null);
+
+
     ViewResult<Map> result = db.queryView("cids/all", Map.class, null, null);
 //    ViewResult<Map> result = db.queryViewByKeys("cids/all", Map.class, null, null, null);
     List<ValueRow<Map>> rows = result.getRows();
@@ -125,11 +175,11 @@ public class PullCompounds
       for (ValueRow<Map> vr : rows)
       {
         System.out.println("Updating: " + vr.getId() + " with CID " + cid);
-        String id = vr.getId();
-        Map<String, String> doc = db.getDocument(Map.class, id);
-
-        doc.put("structure", record.getMolfile());
-        db.updateDocument(doc);
+//        String id = vr.getId();
+//        Map<String, String> doc = db.getDocument(Map.class, id);
+//
+//        doc.put("structure", record.getMolfile());
+//        db.updateDocument(doc);
       }
     }
   }
