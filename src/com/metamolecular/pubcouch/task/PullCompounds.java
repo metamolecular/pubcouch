@@ -175,11 +175,11 @@ public class PullCompounds
       for (ValueRow<Map> vr : rows)
       {
         System.out.println("Updating: " + vr.getId() + " with CID " + cid);
-//        String id = vr.getId();
-//        Map<String, String> doc = db.getDocument(Map.class, id);
-//
-//        doc.put("structure", record.getMolfile());
-//        db.updateDocument(doc);
+        String id = vr.getId();
+        Map<String, String> doc = db.getDocument(Map.class, id);
+
+        doc.put("structure", record.getMolfile());
+        db.updateDocument(doc);
       }
     }
   }
