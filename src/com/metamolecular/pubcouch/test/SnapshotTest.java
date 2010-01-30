@@ -105,7 +105,7 @@ public class SnapshotTest extends TestCase
       {
         client.changeWorkingDirectory(anyString);
         client.listNames();
-        result = new String[]{ "foo" };
+        result = new String[]{ "Compound_00000001_00025000.sdf.gz" };
         client.setFileType(FTP.BINARY_FILE_TYPE);
         client.retrieveFileStream(anyString);
         result = new ByteArrayInputStream(zipStringToBytes(records));
@@ -124,12 +124,17 @@ public class SnapshotTest extends TestCase
       {
         client.listNames();
         result = new String[]
-                {
-                  "foo", "bar", "baz"
-                };
-        client.retrieveFileStream(anyString);
+        {
+          "Readme.txt",
+          "Compound_00000001_00025000.sdf.gz",
+          "Compound_00025001_00050000.sdf.gz",
+          "Compound_00050001_00075000.sdf.gz"
+        };
+        client.retrieveFileStream("Compound_00000001_00025000.sdf.gz");
         result = new ByteArrayInputStream(zipStringToBytes(records));
+        client.retrieveFileStream("Compound_00025001_00050000.sdf.gz");
         result = new ByteArrayInputStream(zipStringToBytes(records));
+        client.retrieveFileStream("Compound_00050001_00075000.sdf.gz");
         result = new ByteArrayInputStream(zipStringToBytes(records));
       }
     };

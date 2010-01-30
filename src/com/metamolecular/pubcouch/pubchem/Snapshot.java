@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -131,24 +132,36 @@ public class Snapshot extends Archive
 
   public InputStream getStream() throws IOException
   {
-    String[] allNames = client.listNames();
-    Arrays.sort(allNames, String.CASE_INSENSITIVE_ORDER);
+    return new SequenceInputStream(new StreamEnumerator(getFilenames()));
+  }
 
-    return new SequenceInputStream(new StreamEnumerator(allNames));
+  private List<String> getFilenames() throws IOException
+  {
+    List<String> result = new ArrayList();
+    String[] names = client.listNames();
+
+    for (String name : names)
+    {
+      if (name.matches(".*\\.sdf\\.gz"))
+      {
+        result.add(name);
+      }
+    }
+
+    Collections.sort(result);
+
+    return result;
   }
 
   private InputStream getStream(int beginAfter) throws IOException
   {
 //    Compound_00000001_00025000.sdf.gz
-    Pattern pattern = Pattern.compile("^(Substance|Compound)_(\\d{8})_(\\d{8}).sdf.gz");
-    List<String> names = new ArrayList();
-    String[] allNames = client.listNames();
-
-    Arrays.sort(allNames, String.CASE_INSENSITIVE_ORDER);
-
+    Pattern pattern = Pattern.compile("^(Substance|Compound)_(\\d{8})_(\\d{8})\\.sdf\\.gz");
+    List<String> filenames = getFilenames();
+    List<String> keep = new ArrayList();
     boolean check = true;
 
-    for (String name : allNames)
+    for (String name : filenames)
     {
       Matcher matcher = pattern.matcher(name);
 
@@ -161,29 +174,26 @@ public class Snapshot extends Archive
 
           if (beginAfter >= start && beginAfter <= end)
           {
-            names.add(name);
+            keep.add(name);
             check = false;
           }
         }
         else
         {
-          names.add(name);
+          keep.add(name);
         }
       }
     }
-
-    String[] namesArray = (String[]) names.toArray(new String[0]);
     
-    return new SequenceInputStream(new StreamEnumerator(namesArray));
+    return new SequenceInputStream(new StreamEnumerator(keep));
   }
 
   private class StreamEnumerator implements Enumeration<InputStream>
   {
-
-    private String[] filenames;
+    private List<String> filenames;
     private int index;
 
-    private StreamEnumerator(String[] filenames)
+    private StreamEnumerator(List<String> filenames)
     {
       this.filenames = filenames;
       this.index = 0;
@@ -191,7 +201,7 @@ public class Snapshot extends Archive
 
     public boolean hasMoreElements()
     {
-      return index < filenames.length;
+      return index < filenames.size();
     }
 
     public InputStream nextElement()
@@ -212,7 +222,7 @@ public class Snapshot extends Archive
       try
       {
         client.setFileType(FTP.BINARY_FILE_TYPE);
-        result = new GZIPInputStream(client.retrieveFileStream(filenames[index]));
+        result = new GZIPInputStream(client.retrieveFileStream(filenames.get(index)));
       }
       catch (IOException e)
       {
