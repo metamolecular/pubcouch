@@ -101,11 +101,21 @@ public class Snapshot extends Archive
     client.changeWorkingDirectory(SUBSTANCES_DIR);
     DefaultRecordStreamer result = new DefaultRecordStreamer(getStream(beginAfter));
     String key = "PUBCHEM_SUBSTANCE_ID";
-    String value = String.valueOf(beginAfter);
 
     for (Record record : result)
     {
-      if (record.get(key).equals(value))
+      int sid = 0;
+
+      try
+      {
+        sid = Integer.parseInt(record.get(key));
+      }
+      catch (Exception e)
+      {
+        continue;
+      }
+
+      if (sid >= beginAfter)
       {
         break;
       }
@@ -149,7 +159,7 @@ public class Snapshot extends Archive
           int start = Integer.parseInt(matcher.group(2));
           int end = Integer.parseInt(matcher.group(3));
 
-          if (beginAfter >= start && beginAfter < end)
+          if (beginAfter >= start && beginAfter <= end)
           {
             names.add(name);
             check = false;

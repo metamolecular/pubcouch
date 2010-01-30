@@ -52,7 +52,7 @@ namespace :synonyms do
     task = PullSynonyms.new 'localhost', 'synonyms'
     task.setMaxRecords -1
     
-    task.run 4567890
+    task.run
   end
 end
 
