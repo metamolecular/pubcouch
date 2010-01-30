@@ -32,8 +32,11 @@ import com.metamolecular.pubcouch.record.Record;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.jcouchdb.db.Database;
 import org.jcouchdb.db.Options;
 import org.jcouchdb.document.ValueRow;
@@ -63,6 +66,20 @@ public class PullCompounds
     markCompounds();
 
     FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getCompounds(), new PassAllFilter());
+
+    for (Record record : streamer)
+    {
+      addStructureAttributes(record);
+    }
+
+    System.out.println("bits set: " + bitSet.cardinality());
+  }
+
+  public void run(int beginAfter) throws IOException
+  {
+    markCompounds();
+    
+    FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getCompounds(beginAfter), new PassAllFilter());
 
     for (Record record : streamer)
     {

@@ -143,6 +143,47 @@ public class SnapshotTest extends TestCase
     assertFalse(it.hasNext());
   }
 
+  public void testGetCompoundsStreamsFromCID() throws Exception
+  {
+    final String chunk1 =
+            Molfiles.benzene + "\n"+
+            "> <PUBCHEM_COMPOUND_CID>\n" +
+            "53000\n" +
+            "\n$$$$\n" +
+            Molfiles.benzene + "\n"+
+            "> <PUBCHEM_COMPOUND_CID>\n" +
+            "53001\n" +
+            "\n$$$$\n";
+    final String chunk2 =
+            Molfiles.benzene + "\n"+
+            "> <PUBCHEM_COMPOUND_CID>\n" +
+            "75001\n" +
+            "\n$$$$\n";
+
+    new NonStrictExpectations()
+    {
+      {
+        client.listNames();
+        result = new String[]
+        {
+          "Compound_00000001_00025000.sdf.gz",
+          "Compound_00025001_00050000.sdf.gz",
+          "Compound_00050001_00075000.sdf.gz",
+          "Compound_00075001_00100000.sdf.gz"
+        };
+        client.retrieveFileStream("Compound_00050001_00075000.sdf.gz");
+        result = new ByteArrayInputStream(zipStringToBytes(chunk1));
+        client.retrieveFileStream("Compound_00075001_00100000.sdf.gz");
+        result = new ByteArrayInputStream(zipStringToBytes(chunk2));
+      }
+    };
+    DefaultRecordStreamer streamer = snapshot.getCompounds(53000);
+    Iterator<Record> it = streamer.iterator();
+    assertTrue(it.hasNext());
+    assertEquals("53001", it.next().get("PUBCHEM_COMPOUND_CID"));
+    assertTrue(it.hasNext());
+  }
+
   public void testGetSubstancesStreamsFromSID() throws Exception
   {
     final String chunk1 =

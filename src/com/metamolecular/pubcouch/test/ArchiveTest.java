@@ -86,5 +86,11 @@ public  class ArchiveTest extends TestCase
     {
       throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public DefaultRecordStreamer getCompounds(int beginAfter) throws IOException
+    {
+      throw new UnsupportedOperationException("Not supported yet.");
+    }
   }
 }

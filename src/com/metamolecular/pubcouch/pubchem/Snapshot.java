@@ -68,6 +68,25 @@ public class Snapshot extends Archive
   }
 
   @Override
+  public DefaultRecordStreamer getCompounds(int beginAfter) throws IOException
+  {
+    client.changeWorkingDirectory(COMPOUNDS_DIR);
+    DefaultRecordStreamer result = new DefaultRecordStreamer(getStream(beginAfter));
+    String key = "PUBCHEM_COMPOUND_CID";
+    String value = String.valueOf(beginAfter);
+
+    for (Record record : result)
+    {
+      if (record.get(key).equals(value))
+      {
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  @Override
   public DefaultRecordStreamer getSubstances() throws IOException
   {
     client.changeWorkingDirectory(SUBSTANCES_DIR);
