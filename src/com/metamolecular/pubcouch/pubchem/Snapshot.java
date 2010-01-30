@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -120,7 +121,10 @@ public class Snapshot extends Archive
 
   public InputStream getStream() throws IOException
   {
-    return new SequenceInputStream(new StreamEnumerator(client.listNames()));
+    String[] allNames = client.listNames();
+    Arrays.sort(allNames, String.CASE_INSENSITIVE_ORDER);
+
+    return new SequenceInputStream(new StreamEnumerator(allNames));
   }
 
   private InputStream getStream(int beginAfter) throws IOException
@@ -129,6 +133,9 @@ public class Snapshot extends Archive
     Pattern pattern = Pattern.compile("^(Substance|Compound)_(\\d{8})_(\\d{8}).sdf.gz");
     List<String> names = new ArrayList();
     String[] allNames = client.listNames();
+
+    Arrays.sort(allNames, String.CASE_INSENSITIVE_ORDER);
+
     boolean check = true;
 
     for (String name : allNames)
@@ -155,7 +162,9 @@ public class Snapshot extends Archive
       }
     }
 
-    return new SequenceInputStream(new StreamEnumerator((String[]) names.toArray(new String[0])));
+    String[] namesArray = (String[]) names.toArray(new String[0]);
+    
+    return new SequenceInputStream(new StreamEnumerator(namesArray));
   }
 
   private class StreamEnumerator implements Enumeration<InputStream>

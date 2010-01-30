@@ -118,42 +118,28 @@ public class PullSynonyms
     public boolean pass(Record record)
     {
       String field = record.get(PUBCHEM_GENERIC_REGISTRY_NAME);
-      System.out.println(record.get(PUBCHEM_SUBSTANCE_ID) + ": synonym: " + field);
+      System.out.println("Compound CID: " + record.get(PUBCHEM_SUBSTANCE_ID) + ": synonym: " + field);
       return field != null;
     }
   }
 
   private void writeDocuments(Record record, Set<String> synonyms, Map<String, String> doc)
   {
-    String registryNameField = record.get(PUBCHEM_GENERIC_REGISTRY_NAME);
+    String cid = getCID(record);
 
-    if (registryNameField != null)
+    if (cid == null)
     {
-      synonyms.addAll(Arrays.asList(registryNameField.split("\r\n|\r|\n")));
+      return;
     }
 
+    String registryNameField = record.get(PUBCHEM_GENERIC_REGISTRY_NAME);
+    synonyms.addAll(Arrays.asList(registryNameField.split("\r\n|\r|\n")));
+
+    doc.put("molfile", record.getMolfile());
     doc.put("submitter", record.get(PUBCHEM_EXT_DATASOURCE_NAME));
     doc.put("sid", record.get(PUBCHEM_SUBSTANCE_ID));
-    doc.put("uri", record.get(PUBCHEM_EXT_SUBSTANCE_URL));
-
-    String cidAssociationsField = record.get(PUBCHEM_CID_ASSOCIATIONS);
-    String cid = null;
-
-    if (cidAssociationsField != null)
-    {
-      for (String association : cidAssociationsField.split("\r\n|\r|\n"))
-      {
-        String[] split = association.split("  ");
-
-        if ("1".equals(split[1]))
-        {
-          cid = split[0];
-          break;
-        }
-      }
-    }
-
     doc.put("cid", cid);
+    doc.put("uri", record.get(PUBCHEM_EXT_SUBSTANCE_URL));
 
     for (String synonym : synonyms)
     {
@@ -165,5 +151,31 @@ public class PullSynonyms
 
     doc.clear();
     synonyms.clear();
+  }
+
+  private String getCID(Record record)
+  {
+    String cidAssociationsField = record.get(PUBCHEM_CID_ASSOCIATIONS);
+    String cid = null;
+    if (cidAssociationsField != null)
+    {
+      for (String association : cidAssociationsField.split("\r\n|\r|\n"))
+      {
+        String[] split = association.split("  ");
+
+        if (split.length != 2)
+        {
+          continue;
+        }
+
+        if ("1".equals(split[1]))
+        {
+          cid = split[0];
+          break;
+        }
+      }
+    }
+
+    return cid;
   }
 }
