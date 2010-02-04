@@ -43,7 +43,7 @@ import org.jcouchdb.db.Database;
  *
  * @author Richard L. Apodaca <rapodaca at metamolecular.com>
  */
-public class PullSynonyms
+public class Synonyms
 {
 
   private static String PUBCHEM_GENERIC_REGISTRY_NAME = "PUBCHEM_GENERIC_REGISTRY_NAME";
@@ -56,7 +56,7 @@ public class PullSynonyms
   private Snapshot snapshot;
   private Database db;
 
-  public PullSynonyms(String host, String databaseName) throws IOException
+  public Synonyms(String host, String databaseName) throws IOException
   {
     this.compositeFilter = new CompositeFilter();
     this.db = new Database(host, databaseName);
@@ -73,7 +73,7 @@ public class PullSynonyms
     countingFilter.setMaxRecords(maxRecords);
   }
 
-  public void run() throws IOException
+  public void snapshot() throws IOException
   {
     FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getSubstances(), compositeFilter);
     Map<String, String> doc = new HashMap();
@@ -90,7 +90,7 @@ public class PullSynonyms
     }
   }
 
-  public void run(int beginAfter) throws IOException
+  public void shapshot(int beginAfter) throws IOException
   {
     FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getSubstances(beginAfter), compositeFilter);
     Map<String, String> doc = new HashMap();
