@@ -50,7 +50,7 @@ public class Record
   public Record(BufferedReader reader) throws IOException
   {
     properties = new HashMap();
-    keyPattern = Pattern.compile("^> *?<(.*?)>");
+    keyPattern = Pattern.compile("^> *?<(.*?)>.*?$");
     readLines(reader);
 
     if (molfile == null)
