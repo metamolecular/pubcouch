@@ -29,7 +29,7 @@ namespace :compounds do
   task :snapshot do
     task = Compounds.new 'localhost', 'compounds'
     task.setMaxRecords -1
-    task.snapshot 3961839
+    task.snapshot
   end
 end
 
