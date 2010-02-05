@@ -85,6 +85,20 @@ public class Compounds
     }
   }
 
+  public void snapshot(int beginAfter) throws IOException
+  {
+    FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getCompounds(beginAfter), new StrictFilter());
+    Map<String, String> doc = new HashMap();
+
+    for (Record record : streamer)
+    {
+      writeDocument(record, doc);
+      db.createDocument(doc);
+
+      doc.clear();
+    }
+  }
+
   private void writeDocument(Record record, Map<String, String> doc)
   {
     System.out.println("Writing CID " + record.get(PUBCHEM_COMPOUND_CID));
