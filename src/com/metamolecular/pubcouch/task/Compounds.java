@@ -25,6 +25,7 @@
  */
 package com.metamolecular.pubcouch.task;
 
+import com.metamolecular.pubcouch.filter.CompositeFilter;
 import com.metamolecular.pubcouch.filter.CountingFilter;
 import com.metamolecular.pubcouch.filter.RecordFilter;
 import com.metamolecular.pubcouch.pubchem.Snapshot;
@@ -63,6 +64,7 @@ public class Compounds
   private CountingFilter countingFilter;
   private Database db;
   private Pattern pattern = null;
+  private CompositeFilter composite;
 
   public Compounds(String host, String databaseName) throws IOException
   {
@@ -71,6 +73,9 @@ public class Compounds
     this.snapshot = new Snapshot();
     this.snapshot.connect("anonymous", "");
     this.pattern = Pattern.compile("(InChI=1.+)");
+    this.composite = new CompositeFilter();
+    this.composite.addFilter(new StrictFilter());
+    this.composite.addFilter(countingFilter);
   }
 
   public void setMaxRecords(int maxRecords)
@@ -80,7 +85,7 @@ public class Compounds
 
   public void snapshot() throws IOException
   {
-    FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getCompounds(), new StrictFilter());
+    FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getCompounds(), composite);
     Map<String, String> doc = new HashMap();
 
     for (Record record : streamer)
