@@ -30,9 +30,13 @@ import com.metamolecular.pubcouch.filter.RecordFilter;
 import com.metamolecular.pubcouch.pubchem.Snapshot;
 import com.metamolecular.pubcouch.record.FilterRecordStreamer;
 import com.metamolecular.pubcouch.record.Record;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jcouchdb.db.Database;
 
 /**
@@ -46,17 +50,19 @@ public class Compounds
   private static String PUBCHEM_NIST_INCHI = "PUBCHEM_NIST_INCHI";
   private static String PUBCHEM_TOTAL_CHARGE = "PUBCHEM_TOTAL_CHARGE";
   private static String PUBCHEM_BONDANNOTATIONS = "PUBCHEM_BONDANNOTATIONS";
+  private static String WEDGE_UP = "5";
+  private static String WEDGE_DOWN = "6";
   private static String AROMATIC = "8";
   private static String ZERO = "0";
-  private static String QUESTION = "?";
+  private static String UNDEFINED_STEREO = "?";
   private static String DOT = ".";
   private static String ID = "_id";
   private static String INCHI = "inchi";
   private static String SERIALIZATION = "serialization";
-  
   private Snapshot snapshot;
   private CountingFilter countingFilter;
   private Database db;
+  private Pattern pattern = null;
 
   public Compounds(String host, String databaseName) throws IOException
   {
@@ -64,6 +70,7 @@ public class Compounds
     this.countingFilter = new CountingFilter(500);
     this.snapshot = new Snapshot();
     this.snapshot.connect("anonymous", "");
+    this.pattern = Pattern.compile("(InChI=1.+)");
   }
 
   public void setMaxRecords(int maxRecords)
@@ -108,6 +115,36 @@ public class Compounds
     doc.put(SERIALIZATION, record.getMolfile());
   }
 
+  private String inchi(String molfile) throws IOException, InterruptedException
+  {
+    System.out.println("finding missing stereo with inchi...");
+
+    String[] cmd =
+    {
+      "/bin/sh", "-c", "echo \"" + molfile + "\" | inchi-1.02b -STDIO -SUU"
+    };
+    String lines = "";
+
+    Runtime run = Runtime.getRuntime();
+    Process pr = run.exec(cmd);
+    pr.waitFor();
+    BufferedReader buf = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+    String line = "";
+    while ((line = buf.readLine()) != null)
+    {
+      lines += line + "\n";
+    }
+
+    Matcher m = pattern.matcher(lines);
+
+    if (m.find())
+    {
+      return m.group(1);
+    }
+
+    return "";
+  }
+
   private class StrictFilter implements RecordFilter
   {
 
@@ -119,25 +156,34 @@ public class Compounds
     public boolean pass(Record record)
     {
       System.out.println("checking: " + record.get(PUBCHEM_COMPOUND_CID));
-      String inchi = record.get(PUBCHEM_NIST_INCHI);
 
-      if (inchi == null)
-      {
-        System.out.println("no inchi");
-        return false;
-      }
-
-      boolean pass = !undefinedStereo(inchi) &&
-             !multicomponent(inchi) &&
-             !charged(record) &&
-             !badBondAnnotations(record);
+      boolean pass = !multicomponent(record.get(PUBCHEM_NIST_INCHI))
+              && !charged(record)
+              && !badBondAnnotations(record)
+              && !undefinedStereo(record);
 
       return pass;
     }
 
-    private boolean undefinedStereo(String inchi)
+    private boolean undefinedStereo(Record record)
     {
-      return inchi.contains(QUESTION);
+      String inchi = null;
+
+      try
+      {
+        inchi = inchi(record.getMolfile());
+      }
+      catch (Exception e)
+      {
+        return true;
+      }
+
+      if ("".equals(inchi))
+      {
+        return true;
+      }
+
+      return inchi.contains(UNDEFINED_STEREO);
     }
 
     private boolean multicomponent(String inchi)
@@ -165,7 +211,7 @@ public class Compounds
       {
         return false;
       }
-      
+
       String[] lines = field.split("\\n");
 
       for (String annotation : lines)
@@ -182,7 +228,7 @@ public class Compounds
           System.out.println("oops...");
           return true;
         }
-        
+
         if (!keepBond(type))
         {
           return true;
@@ -194,7 +240,7 @@ public class Compounds
 
     private boolean keepBond(String type)
     {
-      return type.equals(AROMATIC);
+      return type.equals(AROMATIC) || type.equals(WEDGE_UP) || type.equals(WEDGE_DOWN);
     }
   }
 }
