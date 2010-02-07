@@ -64,7 +64,7 @@ public class Compounds
   private CountingFilter countingFilter;
   private Database db;
   private Pattern pattern = null;
-  private CompositeFilter composite;
+  private CompositeFilter compositeFilter;
 
   public Compounds(String host, String databaseName) throws IOException
   {
@@ -73,9 +73,9 @@ public class Compounds
     this.snapshot = new Snapshot();
     this.snapshot.connect("anonymous", "");
     this.pattern = Pattern.compile("(InChI=1.+)");
-    this.composite = new CompositeFilter();
-    this.composite.addFilter(new StrictFilter());
-    this.composite.addFilter(countingFilter);
+    this.compositeFilter = new CompositeFilter();
+    this.compositeFilter.addFilter(new StrictFilter());
+    this.compositeFilter.addFilter(countingFilter);
   }
 
   public void setMaxRecords(int maxRecords)
@@ -85,13 +85,13 @@ public class Compounds
 
   public void snapshot() throws IOException
   {
-    FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getCompounds(), composite);
+    FilterRecordStreamer streamer = new FilterRecordStreamer(snapshot.getCompounds(), compositeFilter);
     Map<String, String> doc = new HashMap();
 
     for (Record record : streamer)
     {
       writeDocument(record, doc);
-      db.createDocument(doc);
+//      db.createDocument(doc);
 
       doc.clear();
     }
@@ -105,7 +105,7 @@ public class Compounds
     for (Record record : streamer)
     {
       writeDocument(record, doc);
-      db.createDocument(doc);
+//      db.createDocument(doc);
 
       doc.clear();
     }
@@ -113,7 +113,7 @@ public class Compounds
 
   private void writeDocument(Record record, Map<String, String> doc)
   {
-    System.out.println("Writing CID " + record.get(PUBCHEM_COMPOUND_CID));
+//    System.out.println("Writing CID " + record.get(PUBCHEM_COMPOUND_CID));
 
     doc.put(ID, record.get(PUBCHEM_COMPOUND_CID));
     doc.put(INCHI, record.get(PUBCHEM_NIST_INCHI));
@@ -122,7 +122,7 @@ public class Compounds
 
   private String inchi(String molfile) throws IOException, InterruptedException
   {
-    System.out.println("finding missing stereo with inchi...");
+//    System.out.println("finding missing stereo with inchi...");
 
     String[] cmd =
     {
@@ -152,7 +152,7 @@ public class Compounds
 
   private class StrictFilter implements RecordFilter
   {
-
+//    int count = 0;
     public boolean abort()
     {
       return false;
@@ -160,6 +160,12 @@ public class Compounds
 
     public boolean pass(Record record)
     {
+//      count++;
+//      if (count < 21000)
+//      {
+//        System.out.println("skipping: " + record.get(PUBCHEM_COMPOUND_CID));
+//        return true;
+//      }
       System.out.println("checking: " + record.get(PUBCHEM_COMPOUND_CID));
 
       boolean pass = !multicomponent(record.get(PUBCHEM_NIST_INCHI))
@@ -182,6 +188,8 @@ public class Compounds
       {
         return true;
       }
+
+//      System.out.println(inchi);
 
       if ("".equals(inchi))
       {

@@ -99,6 +99,7 @@ public class Snapshot extends Archive
   @Override
   public DefaultRecordStreamer getSubstances(int beginAfter) throws IOException
   {
+    client.setConnectTimeout(1000);
     client.changeWorkingDirectory(SUBSTANCES_DIR);
     DefaultRecordStreamer result = new DefaultRecordStreamer(getStream(beginAfter));
     String key = "PUBCHEM_SUBSTANCE_ID";
@@ -206,11 +207,15 @@ public class Snapshot extends Archive
 
     public InputStream nextElement()
     {
+      System.out.println("loading next stream...");
       try
       {
         if (index != 0)
         {
+          System.out.println("complete pending");
+          Thread.sleep(1000);
           client.completePendingCommand();
+          System.out.println("done");
         }
       }
       catch (Exception e)
@@ -230,6 +235,8 @@ public class Snapshot extends Archive
       }
 
       index++;
+
+      System.out.println("done");
 
       return result;
     }
